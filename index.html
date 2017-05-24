@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Crossfilter OMMP Test</title>
+    <!--libraries for mapping and data-->
+    <!--Leaflet-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" >
+    <!--DC-->
+    <link rel="stylesheet" href="https://dc-js.github.io/dc.js/css/dc.min.css">
+    <!--Bootstrap-->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!--cloudflare animation-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <!--Storymap css-->
+    <!--<link rel="stylesheet" type="text/css" href="css/storymap.css">-->
+    <!--CSS-->
+    <link rel="stylesheet" href="css/LPRO_Style.css">
+    <link rel="stylesheet" href="css/main.css">
+
+    <!--Webfont if ours doesn't work-->
+    <link href="https://fonts.googleapis.com/css?family=Sorts+Mill+Goudy" rel="stylesheet">
+
+
+    <script src="https://dc-js.github.io/dc.js/js/d3.js"></script>
+    <script src="https://dc-js.github.io/dc.js/js/crossfilter.js"></script>
+    <script src="https://dc-js.github.io/dc.js/js/dc.js"></script>
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--story map plugin-->
+    <!--<script src="js/storymap.js"></script>-->
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6 col-md-4 main">
+            <h4>County Patients</h4>
+            <div id="patientsChart"></div>
+            <!--<h4>County Caregivers</h4>-->
+            <!--<div id="caregiversChart"></div>-->
+            <!--<h4>County Growsites</h4>-->
+            <!--<div id="growersChart"></div>-->
+            <!--<h4>County Growers</h4>-->
+            <!--<div id="growsitesChart"></div>-->
+        </div>
+        <div id="map" class="col-sm-6 col-md-8 sidebar"></div>
+    </div>
+</div>
+
+<script>
+
+var map = L.map('map', {zoomControl: false, scrollWheelZoom: true}).setView([44.0304255,-124.2701962], 6);
+L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}').addTo(map);
+d3.json('assets/OR_OMMP.geojson', function(data) {
+
+
+    //create crossfilter and dimensions
+    var filter = crossfilter(data.features); //filter is the root object of crossfilter
+    var all = filter.groupAll();  // study some of the key functions of crossfilter, such as groupAll, dimension
+    var everything = filter.dimension(function(d) {
+        return d
+    });
+
+    var geomDimension = filter.dimension(function(d) {
+        return d.geometry
+    });
+
+
+    var Patients_Apr17Dimension = filter.dimension(function(d) {
+        var Patients_Apr17 = d.properties.Patients_Apr17;
+        return  Patients_Apr17 < 50    ? '50-499' :
+                Patients_Apr17 < 500   ? '500-999' :
+                Patients_Apr17 < 1000  ? '1,000-4,999' :
+                Patients_Apr17 < 5000  ? '5,000-9,999' :
+                Patients_Apr17 < 10000 ? '10,000-14,999' :
+                '>15,000'
+    });
+
+    var Patients_Apr17DimensionGroup = Patients_Apr17Dimension.group();
+
+
+//    var Patients_Jan17Dimension = filter.dimension(function(d) {
+//        var Patients_Jan17 = d.properties.Patients_Jan17;
+//        return  Patients_Jan17 < 50    ? '50-499' :
+//                Patients_Jan17 < 500   ? '500-999' :
+//                Patients_Jan17 < 1000  ? '1,000-4,999' :
+//                Patients_Jan17 < 5000  ? '5,000-9,999' :
+//                Patients_Jan17 < 10000 ? '10,000-14,999' :
+//                '>15,000'
+//    });
+//
+//    var Patients_Jan17DimensionGroup = Patients_Jan17Dimension.group();
+
+
+    var geoJsonLayer = L.geoJson({
+        type: 'FeatureCollection',
+        features: geomDimension.top(Infinity)
+    }, {
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, {
+                radius: Math.pow(feature.properties.instName, 2)/2,
+                fillColor: "steelblue",
+                color: "steelblue",
+                weight: 1,
+                stroke: false,
+                opacity: 0.1,
+                fillOpacity: 0.1
+            })
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindTooltip(feature.properties.instName.toString()); // if the content in the Tooltip is a float or integer value, we should convert it to string by the method value.tostring()
+        }
+    }).addTo(map);
+
+
+    var patientsChart = dc.barChart('#patientsChart');
+
+    patientsChart
+        .height(180)
+        .margins({top: 10, right: 50, bottom: 30, left: 40})
+        .dimension(Patients_Apr17Dimension)
+        .group(Patients_Apr17DimensionGroup)
+        .elasticY(true)
+        .x(d3.scale.ordinal())
+        .xUnits(dc.units.ordinal)
+        .yAxis()
+        .ticks(1);
+
+
+
+
+    dc.renderAll();
+    //chart listeners
+    patientsChart.on('filtered', function(chart, filter) {
+        updateMap()
+    });
+
+
+//    caregiversChart.on('filtered', function(chart, filter) {
+//        updateMap()
+//    });
+//    growersChart.on('filtered', function(chart, filter) {
+//        updateMap()
+//    });
+//    growsitiesChart.on('filtered', function(chart, filter) {
+//    updateMap()
+//    });
+
+
+    function updateMap() {
+        geoJsonLayer.clearLayers();
+        geoJsonLayer.addData({
+            type: 'FeatureCollection',
+            features: everything.top(Infinity)
+        });
+    }
+    //map listeners
+    map.on('moveend', function() {
+        updateMapFilter()
+    });
+    map.on('zoomend', function() {
+        updateMapFilter()
+    });
+
+    function updateMapFilter() {
+        geomDimension.filter(function(d) {
+            return map.getBounds().contains(L.geoJSON(d).getBounds())
+        });
+        dc.redrawAll();
+    }
+
+});
+</script>
+</body>
+</html>
