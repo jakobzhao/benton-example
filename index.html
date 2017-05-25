@@ -118,13 +118,14 @@
 
 <script>
 
-var map = L.map('map', {zoomControl: false, scrollWheelZoom: true}).setView([44.570861,-123.276327], 12);
+var map = L.map('map', {zoomControl: false, scrollWheelZoom: true, maxZoom: 21}).setView([44.570861,-123.276327], 12);
 //L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png').addTo(map);
 
 
 var gl = L.mapboxGL({
     accessToken: 'pk.eyJ1Ijoic2F2YWdlbSIsImEiOiJjaXp1ZW1xYmEwMHdvMndwM3Y2b3V3bW5qIn0.N1fF74bH4lqXaLUaJFxsFA',
-    style: 'assets/style.json'
+    style: 'assets/style.json',
+    maxZoom: 21
 }).addTo(map);
 
 
