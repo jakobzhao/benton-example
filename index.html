@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Crossfilter OMMP Test</title>
+    <title>Benton County</title>
     <!--libraries for mapping and data-->
     <!--Leaflet-->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" >
@@ -12,49 +12,124 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <!--cloudflare animation-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
-    <!--Storymap css-->
-    <!--<link rel="stylesheet" type="text/css" href="css/storymap.css">-->
+
+    <!--add a favicon-->
+    <link rel="favicon" href="img/logo.ico" type="image/ico" />
+
+    <link rel="stylesheet" href="css/MarkerCluster.css" />
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+
     <!--CSS-->
-    <link rel="stylesheet" href="css/LPRO_Style.css">
     <link rel="stylesheet" href="css/main.css">
 
-    <!--Webfont if ours doesn't work-->
-    <link href="https://fonts.googleapis.com/css?family=Sorts+Mill+Goudy" rel="stylesheet">
+
+    <!--add font families-->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 
 
     <script src="https://dc-js.github.io/dc.js/js/d3.js"></script>
     <script src="https://dc-js.github.io/dc.js/js/crossfilter.js"></script>
     <script src="https://dc-js.github.io/dc.js/js/dc.js"></script>
+
+
     <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="js/leaflet.markercluster-src.js"></script>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <!--story map plugin-->
-    <!--<script src="js/storymap.js"></script>-->
+
+    <!-- mapbox gl js -->
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.js"></script>
+    <!-- leaflet mapbox js -->
+    <script src="http://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
+
 </head>
 
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-6 col-md-4 main">
-            <h4>County Patients</h4>
-            <div id="patientsChart"></div>
-            <!--<h4>County Caregivers</h4>-->
-            <!--<div id="caregiversChart"></div>-->
-            <!--<h4>County Growsites</h4>-->
-            <!--<div id="growersChart"></div>-->
-            <!--<h4>County Growers</h4>-->
-            <!--<div id="growsitesChart"></div>-->
+
+<div class="navbar navbar-inverse navbar-fixed-top navbar-toggleable-md" role="navigation">
+    <div class="container">
+        <!--<div class="container-fluid">-->
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <!--<a class="navbar-brand" href="#">GeoVisualization</a>-->
+            <a class="navbar-brand" href="#" title="GeoVisualization Example">
+                <img src="img/logo-long.png" style="width:80%; margin-top:-10px" class="d-inline-block align-top">
+            </a>
         </div>
-        <div id="map" class="col-sm-6 col-md-8 sidebar"></div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="immigrants.html">Immigrant Flow</a>
+                </li>
+                <li>
+                    <a href="slr.html" target="_blank">Sea Level Rise</a>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Share To... <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#"> <i class="fa fa-facebook-square" aria-hidden="true"></i> Facebook</a></li>
+                        <li><a href="#"> <i class="fa fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+                        <li><a href="https://alturl.com/kni7r"> <i class="fa fa-link" aria-hidden="true"></i> ShortUrl</a></li>
+                    </ul>
+
+                <li>
+                    <a href="about.html"> <i class="fa fa-github fa-lg" aria-hidden="true"></i>&nbsp;&nbsp;<span>Source Codes</span></a>
+                </li>
+
+                <li>
+                    <a href="about.html" target="_blank">About</a>
+                </li>
+
+                <li>
+                    <a data-toggle="modal" data-target="#info-modal">About Popup</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<div class="container-fluid">
+    <div class="row justify-content-md-center">
+        <div class="sidebar">
+            <div class="col col-md-3">
+            <h4>Gender</h4>
+            <div id="genderChart"></div>
+            </div>
+            <div class="col col-md-2">
+            <h4>Ethnicity</h4>
+            <div id="ethnicityChart"></div>
+            </div>
+            <div class="col col-md-2">
+            <h4>Annual Home Income</h4>
+            <div id="incomeChart"></div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div id="map" class="main"></div>
+    </div>
     </div>
 </div>
 
 <script>
 
-var map = L.map('map', {zoomControl: false, scrollWheelZoom: true}).setView([44.0304255,-124.2701962], 6);
-L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}').addTo(map);
-d3.json('assets/OR_OMMP.geojson', function(data) {
+var map = L.map('map', {zoomControl: false, scrollWheelZoom: true}).setView([44.570861,-123.276327], 12);
+//L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png').addTo(map);
 
+
+var gl = L.mapboxGL({
+    accessToken: 'pk.eyJ1Ijoic2F2YWdlbSIsImEiOiJjaXp1ZW1xYmEwMHdvMndwM3Y2b3V3bW5qIn0.N1fF74bH4lqXaLUaJFxsFA',
+    style: 'assets/style.json'
+}).addTo(map);
+
+
+
+d3.json('assets/demo.geojson', function(data) {
 
     //create crossfilter and dimensions
     var filter = crossfilter(data.features); //filter is the root object of crossfilter
@@ -68,30 +143,30 @@ d3.json('assets/OR_OMMP.geojson', function(data) {
     });
 
 
-    var Patients_Apr17Dimension = filter.dimension(function(d) {
-        var Patients_Apr17 = d.properties.Patients_Apr17;
-        return  Patients_Apr17 < 50    ? '50-499' :
-                Patients_Apr17 < 500   ? '500-999' :
-                Patients_Apr17 < 1000  ? '1,000-4,999' :
-                Patients_Apr17 < 5000  ? '5,000-9,999' :
-                Patients_Apr17 < 10000 ? '10,000-14,999' :
-                '>15,000'
+    var genderDimension = filter.dimension(function(d) {
+        return d.properties.gender
+
     });
 
-    var Patients_Apr17DimensionGroup = Patients_Apr17Dimension.group();
+    var genderDimensionGroup = genderDimension.group();
 
 
-//    var Patients_Jan17Dimension = filter.dimension(function(d) {
-//        var Patients_Jan17 = d.properties.Patients_Jan17;
-//        return  Patients_Jan17 < 50    ? '50-499' :
-//                Patients_Jan17 < 500   ? '500-999' :
-//                Patients_Jan17 < 1000  ? '1,000-4,999' :
-//                Patients_Jan17 < 5000  ? '5,000-9,999' :
-//                Patients_Jan17 < 10000 ? '10,000-14,999' :
-//                '>15,000'
-//    });
-//
-//    var Patients_Jan17DimensionGroup = Patients_Jan17Dimension.group();
+
+    var ethnicityDimension = filter.dimension(function(d) {
+        return d.properties.ethnicity
+
+    });
+
+    var ethnicityDimensionGroup = ethnicityDimension.group();
+
+
+    var incomeDimension = filter.dimension(function(d) {
+        return d.properties.annhincome
+
+    });
+
+    var incomeDimensionGroup = incomeDimension.group();
+
 
 
     var geoJsonLayer = L.geoJson({
@@ -99,63 +174,93 @@ d3.json('assets/OR_OMMP.geojson', function(data) {
         features: geomDimension.top(Infinity)
     }, {
         pointToLayer: function (feature, latlng) {
+
             return L.circleMarker(latlng, {
-                radius: Math.pow(feature.properties.instName, 2)/2,
+                radius: 3,
                 fillColor: "steelblue",
                 color: "steelblue",
                 weight: 1,
                 stroke: false,
-                opacity: 0.1,
-                fillOpacity: 0.1
+                opacity: 0.5,
+                fillOpacity: 0.7
             })
         },
         onEachFeature: function (feature, layer) {
-            layer.bindTooltip(feature.properties.instName.toString()); // if the content in the Tooltip is a float or integer value, we should convert it to string by the method value.tostring()
+            layer.bindTooltip(feature.properties.city);
         }
-    }).addTo(map);
+    });
+
+    var markers = L.markerClusterGroup();
+
+    markers.addLayer(geoJsonLayer);
+    markers.addTo(map);
 
 
-    var patientsChart = dc.barChart('#patientsChart');
+    var genderChart = dc.barChart('#genderChart');
 
-    patientsChart
-        .height(180)
-        .margins({top: 10, right: 50, bottom: 30, left: 40})
-        .dimension(Patients_Apr17Dimension)
-        .group(Patients_Apr17DimensionGroup)
-        .elasticY(true)
+    genderChart
+        .height(150)
+        .height(200)
+        .dimension(genderDimension)
+        .group(genderDimensionGroup)
+        .elasticY(false)
         .x(d3.scale.ordinal())
         .xUnits(dc.units.ordinal)
         .yAxis()
-        .ticks(1);
+        .ticks(4);
+
+    var ethnicityChart = dc.pieChart('#ethnicityChart');
+
+    ethnicityChart
+        .width(150)
+        .height(200)
+        .dimension(ethnicityDimension)
+        .group(ethnicityDimensionGroup)
+        .innerRadius(50);
 
 
+    var incomeChart = dc.barChart('#incomeChart');
+
+    incomeChart
+        .width(650)
+        .height(200)
+        .dimension(incomeDimension)
+        .group(incomeDimensionGroup)
+        .elasticY(false)
+        .x(d3.scale.ordinal())
+        .xUnits(dc.units.ordinal)
+        .yAxis()
+        .ticks(4);
 
 
     dc.renderAll();
+
+
     //chart listeners
-    patientsChart.on('filtered', function(chart, filter) {
+    genderChart.on('filtered', function(chart, filter) {
+        updateMap()
+    });
+
+    ethnicityChart.on('filtered', function(chart, filter) {
+        updateMap()
+    });
+
+    incomeChart.on('filtered', function(chart, filter) {
         updateMap()
     });
 
 
-//    caregiversChart.on('filtered', function(chart, filter) {
-//        updateMap()
-//    });
-//    growersChart.on('filtered', function(chart, filter) {
-//        updateMap()
-//    });
-//    growsitiesChart.on('filtered', function(chart, filter) {
-//    updateMap()
-//    });
-
-
     function updateMap() {
         geoJsonLayer.clearLayers();
+        markers.clearLayers();
         geoJsonLayer.addData({
             type: 'FeatureCollection',
             features: everything.top(Infinity)
         });
+        markers.addLayer(geoJsonLayer);
     }
+
+
     //map listeners
     map.on('moveend', function() {
         updateMapFilter()
@@ -164,6 +269,7 @@ d3.json('assets/OR_OMMP.geojson', function(data) {
         updateMapFilter()
     });
 
+
     function updateMapFilter() {
         geomDimension.filter(function(d) {
             return map.getBounds().contains(L.geoJSON(d).getBounds())
@@ -171,7 +277,9 @@ d3.json('assets/OR_OMMP.geojson', function(data) {
         dc.redrawAll();
     }
 
+
 });
+
 </script>
 </body>
 </html>
