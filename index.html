@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
 
     <!--add a favicon-->
-    <link rel="favicon" href="img/logo.ico" type="image/ico" />
+    <link rel="favicon" href="img/favicon.ico" type="image/ico" />
 
     <link rel="stylesheet" href="css/MarkerCluster.css" />
     <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
@@ -92,23 +92,21 @@
 </div>
 
 
-<div class="container-fluid">
-    <div class="row justify-content-md-center">
-        <div class="sidebar">
-            <div class="col col-md-3">
-            <h4>Gender</h4>
-            <div id="genderChart"></div>
-            </div>
-            <div class="col col-md-2">
-            <h4>Ethnicity</h4>
-            <div id="ethnicityChart"></div>
-            </div>
-            <div class="col col-md-2">
-            <h4>Annual Home Income</h4>
-            <div id="incomeChart"></div>
-            </div>
-        </div>
+<div class="container">
+    <div class="row justify-content-md-center sidebar">
 
+            <div class="col col-md-3 text-center">
+                <h4>Gender</h4>
+                <div id="genderChart"></div>
+            </div>
+            <div class="col col-md-3 text-center">
+                <h4>Ethnicity</h4>
+                <div id="ethnicityChart"></div>
+            </div>
+            <div class="col col-md-3 text-center">
+                <h4>Annual Home Income</h4>
+                <div id="incomeChart"></div>
+            </div>
     </div>
     <div class="row">
         <div id="map" class="main"></div>
@@ -200,8 +198,7 @@ d3.json('assets/demo.geojson', function(data) {
     var genderChart = dc.barChart('#genderChart');
 
     genderChart
-        .height(150)
-        .height(200)
+        .height(120)
         .dimension(genderDimension)
         .group(genderDimensionGroup)
         .elasticY(false)
@@ -213,18 +210,16 @@ d3.json('assets/demo.geojson', function(data) {
     var ethnicityChart = dc.pieChart('#ethnicityChart');
 
     ethnicityChart
-        .width(150)
-        .height(200)
+        .height(120)
         .dimension(ethnicityDimension)
         .group(ethnicityDimensionGroup)
-        .innerRadius(50);
+        .innerRadius(25);
 
 
     var incomeChart = dc.barChart('#incomeChart');
 
     incomeChart
-        .width(500)
-        .height(200)
+        .height(120)
         .dimension(incomeDimension)
         .group(incomeDimensionGroup)
         .elasticY(false)

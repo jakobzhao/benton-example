@@ -3,6 +3,10 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 
+h4 {
+
+    font-size: 15px;
+}
 
 @media (min-width: 768px) {
     .main {
@@ -12,20 +16,17 @@ body {
         right: 0;
         overflow-x: hidden;
         overflow-y: hidden;
-
         width: 100%;
     }
 
     .sidebar {
-        position: fixed;
-        height:280px;
-        left: 300px;
+        position: absolute;
         bottom: 0;
         cursor: pointer;
         z-index:1000;
         color: rgba(15, 15, 15, 0.87);
         background-color: rgba(0, 0, 0, 0.31);
-        border-radius: 3px;
+        border-radius: 5px;
         text-shadow: 0 0 1px rgba(197, 197, 197, 0.95);
         padding: 20px;
     }
@@ -45,8 +46,6 @@ body {
         width: 100%;
     }
 
-
-
     .sidebar {
         position: fixed;
         bottom: 0;
@@ -56,7 +55,6 @@ body {
         color: rgba(255, 255, 255, 0.6);
         border-radius: 3px;
         text-shadow: 0 0 6px rgba(197, 197, 197, 0.95);
-
         padding: 10px;
     }
 }
